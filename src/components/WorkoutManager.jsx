@@ -337,12 +337,25 @@ const toggleDone = (i) => setDoneMap(prev => ({ ...prev, [i]: !prev[i] }))
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-      display: 'flex', alignItems: 'flex-end', zIndex: 300 }}
+<>
+<style>{`
+  @keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes sheetSlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+`}</style>
+<div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
+      display: 'flex', alignItems: 'flex-end', zIndex: 300,
+      animation: 'overlayFadeIn 0.25s ease forwards' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
       <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
         padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
-        maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+        maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
+        animation: 'sheetSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
 
         <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
           margin: '0 auto 16px', flexShrink: 0 }}/>
@@ -640,6 +653,7 @@ const toggleDone = (i) => setDoneMap(prev => ({ ...prev, [i]: !prev[i] }))
         </div>
       )}
     </div>
+  </>
   )
 }
 

@@ -7,6 +7,7 @@ import Products from './pages/Products'
 import Profile from './pages/Profile'
 import Analytics from './pages/Analytics'
 import Layout from './components/Layout'
+import SplashScreen from './components/SplashScreen'
 
 const ROUTES = ['/', '/products', '/analytics', '/profile']
 
@@ -24,67 +25,50 @@ function PageContent({ pathname, session }) {
 
 function AnimatedRoutes({ session }) {
   const location = useLocation()
-  const prevPath = useRef(location.pathname)
-  const [current, setCurrent] = useState(location.pathname)
-  const [direction, setDirection] = useState(1)
-  const [phase, setPhase] = useState('idle')
+
+  const [displayLocation, setDisplayLocation] = useState(location)
+  const [stage, setStage] = useState("in")
 
   useEffect(() => {
-    if (location.pathname === current) return
-
-    const prevIndex = ROUTES.indexOf(prevPath.current)
-    const nextIndex = ROUTES.indexOf(location.pathname)
-    const dir = nextIndex >= prevIndex ? 1 : -1
-    setDirection(dir)
-    prevPath.current = location.pathname
-
-    setPhase('out')
-    const t1 = setTimeout(() => {
-      setCurrent(location.pathname)
-      setPhase('in')
-      const t2 = setTimeout(() => setPhase('settle'), 20)
-      return () => clearTimeout(t2)
-    }, 140)
-    return () => clearTimeout(t1)
-  }, [location])
-
-  useEffect(() => {
-    if (phase === 'settle') {
-      const t = setTimeout(() => setPhase('idle'), 280)
-      return () => clearTimeout(t)
+    if (location.pathname !== displayLocation.pathname) {
+      setStage("out")
     }
-  }, [phase])
+  }, [location, displayLocation])
 
-  // Во время idle — НИКАКИХ transform/filter/willChange,
-  // иначе они создают containing block для position:fixed и ломают модалки
-  if (phase === 'idle') {
-    return <PageContent pathname={current} session={session} />
+  const onTransitionEnd = () => {
+    if (stage === "out") {
+      setDisplayLocation(location)
+
+      requestAnimationFrame(() => {
+        setStage("in")
+      })
+    }
   }
 
-  const animStyle = {
-    out: {
-      transform: `translateX(${direction * -4}%)`,
-      filter: 'blur(3px)',
-      opacity: 0,
-      transition: 'transform 0.14s ease, filter 0.14s ease, opacity 0.14s ease',
-    },
-    in: {
-      transform: `translateX(${direction * 4}%)`,
-      filter: 'blur(3px)',
-      opacity: 0,
-      transition: 'none',
-    },
-    settle: {
-      transform: 'translateX(0)',
-      filter: 'blur(0px)',
-      opacity: 1,
-      transition: 'transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), filter 0.26s ease, opacity 0.26s ease',
-    },
-  }[phase]
-
   return (
-    <div style={animStyle}>
-      <PageContent pathname={current} session={session} />
+    <div
+      onTransitionEnd={onTransitionEnd}
+      style={{
+        transform:
+          stage === "out"
+            ? "translateX(-4%)"
+            : "translateX(0)",
+
+        opacity: stage === "out" ? 0 : 1,
+
+        transition:
+          "transform .24s cubic-bezier(.22,1,.36,1), opacity .24s ease",
+
+        willChange: "transform, opacity"
+      }}
+    >
+      <Routes location={displayLocation}>
+        <Route path="/" element={<Diary session={session} />} />
+        <Route path="/products" element={<Products session={session} />} />
+        <Route path="/analytics" element={<Analytics session={session} />} />
+        <Route path="/profile" element={<Profile session={session} />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </div>
   )
 }
@@ -92,7 +76,7 @@ function AnimatedRoutes({ session }) {
 export default function App() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
-
+  const [showSplash, setShowSplash] = useState(true)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -103,6 +87,10 @@ export default function App() {
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  if (showSplash) {
+    return <SplashScreen onFinish={() => setShowSplash(false)} />
+  }
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',

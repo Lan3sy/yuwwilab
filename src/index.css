@@ -19,7 +19,9 @@
   --fat: #ffb74d;
   --carbs: #ce93d8;
 }
-
+html {
+  background: #e8e8ea;
+}
 body {
   background: var(--bg);
   color: var(--text);

@@ -12,6 +12,92 @@ const IconWorkout = ({ size = 20, color = 'currentColor' }) => (
   </svg>
 )
 
+function useDragToClose(onClose) {
+  const [translateY, setTranslateY] = useState(0)
+  const [phase, setPhase] = useState('idle') // idle | dragging | returning | closing
+  const sheetRef = useRef(null)
+  const startY = useRef(0)
+  const startTranslate = useRef(0)
+  const lastY = useRef(0)
+  const lastTime = useRef(0)
+  const velocity = useRef(0)
+  const rafId = useRef(null)
+  const pendingY = useRef(0)
+  const closeDuration = useRef(300)
+
+  const applyNow = (y) => {
+    pendingY.current = y
+    if (rafId.current) return
+    rafId.current = requestAnimationFrame(() => {
+      setTranslateY(pendingY.current)
+      rafId.current = null
+    })
+  }
+
+  const onPointerDown = (e) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    startY.current = e.clientY
+    startTranslate.current = translateY
+    lastY.current = e.clientY
+    lastTime.current = performance.now()
+    velocity.current = 0
+    setPhase('dragging')
+  }
+
+  const onPointerMove = (e) => {
+    if (phase !== 'dragging') return
+    const now = performance.now()
+    const dt = now - lastTime.current
+    if (dt > 0) velocity.current = (e.clientY - lastY.current) / dt
+    lastY.current = e.clientY
+    lastTime.current = now
+
+    const diff = e.clientY - startY.current
+    const next = Math.max(0, startTranslate.current + diff)
+    applyNow(next)
+  }
+
+  const onPointerUp = () => {
+    if (phase !== 'dragging') return
+    const sheetHeight = sheetRef.current?.offsetHeight || window.innerHeight
+    const shouldClose = translateY > sheetHeight * 0.28 || velocity.current > 0.5
+
+    if (shouldClose) {
+      const remaining = sheetHeight - translateY
+      const speed = Math.max(Math.abs(velocity.current), 0.6)
+      const duration = Math.min(Math.max(remaining / speed, 150), 400)
+      closeDuration.current = duration
+      setPhase('closing')
+      requestAnimationFrame(() => setTranslateY(sheetHeight))
+      setTimeout(() => {
+        onClose()
+        setPhase('idle')
+        setTranslateY(0)
+      }, duration)
+    } else {
+      setPhase('returning')
+      setTranslateY(0)
+      setTimeout(() => setPhase('idle'), 320)
+    }
+  }
+
+  const sheetHeightForBackdrop = sheetRef.current?.offsetHeight || window.innerHeight
+  const backdropOpacity = 0.4 * Math.max(0, 1 - translateY / sheetHeightForBackdrop)
+
+  const transition =
+    phase === 'dragging' ? 'none' :
+    phase === 'closing' ? `transform ${closeDuration.current}ms cubic-bezier(0.32, 0.72, 0, 1)` :
+    phase === 'returning' ? 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)' :
+    'none'
+
+  return {
+    sheetRef,
+    handleProps: { onPointerDown, onPointerMove, onPointerUp, onPointerCancel: onPointerUp },
+    sheetStyle: { transform: `translateY(${translateY}px)`, transition },
+    backdropOpacity,
+  }
+}
+
 const formatDate = (date) => date.toISOString().split('T')[0]
 
 const dayLabel = (date) => {
@@ -108,6 +194,7 @@ const fadeStyle = (delay = 0) => ({
 })
 
 export default function Diary({ session }) {
+  const dragClose = useDragToClose(() => setAddingTo(null))
   const [entries, setEntries] = useState([])
   const [meals, setMeals] = useState([])
   const [products, setProducts] = useState([])
@@ -304,7 +391,7 @@ export default function Diary({ session }) {
   }), { cal: 0, protein: 0, fat: 0, carbs: 0 })
 
   const baseCalGoal = profile?.cal_goal || 2000
-  const calGoal = baseCalGoal + burnedToday // норма увеличивается на сожжённые калории
+  const calGoal = baseCalGoal + burnedToday
   const rawProgress = (totals.cal / calGoal) * 100
   const progress = Math.min(rawProgress, 100)
   const remaining = Math.max(calGoal - totals.cal, 0)
@@ -588,7 +675,7 @@ export default function Diary({ session }) {
 
       {/* Модалка редактирования записи */}
       {editingEntry && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setEditingEntry(null)}>
           <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
@@ -646,12 +733,12 @@ export default function Diary({ session }) {
 
       {/* Календарь */}
       {showCalendar && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setShowCalendar(false)}>
           <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
             padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
-            animation: 'fadeIn 0.2s ease forwards', maxHeight: '75vh', overflowY: 'auto' }}>
+            animation: 'fadeIn 0.2s ease forwards', maxHeight: '75dvh', overflowY: 'auto' }}>
             <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2, margin: '0 auto 20px' }}/>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 8 }}>Выбери дату</h3>
 
@@ -736,15 +823,20 @@ export default function Diary({ session }) {
       )}
 
       {/* Модалка добавления продукта */}
-      {addingTo && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+      {addingTo && (() => {
+        const { handleProps, sheetStyle, sheetRef, backdropOpacity } = dragClose
+        return (
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh',
+          background: `rgba(0,0,0,${backdropOpacity})`,
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setAddingTo(null)}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '85vh',
-            display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.2s ease forwards' }}>
-            <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
-              margin: '0 auto 16px', flexShrink: 0 }}/>
+          <div ref={sheetRef} style={{ background: '#fff', borderRadius: '20px 20px 0 0',
+            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '85dvh',
+            display: 'flex', flexDirection: 'column',
+            ...sheetStyle }}>
+            <div {...handleProps} style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
+              margin: '0 auto 16px', flexShrink: 0, cursor: 'grab', touchAction: 'none',
+              padding: '10px 20px', marginTop: -10 }}/>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 16, flexShrink: 0 }}>
               {pickedProduct ? 'Сколько грамм?' : 'Выбери продукт'}
             </h3>
@@ -829,15 +921,17 @@ export default function Diary({ session }) {
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
+      {!addingTo && dragClose.sheetStyle.transform !== 'translateY(0px)' && null}
 
       {/* Редактор приёмов пищи */}
       {showMealEditor && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setShowMealEditor(false)}>
           <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '85vh',
+            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '85dvh',
             display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.2s ease forwards' }}>
             <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
               margin: '0 auto 16px', flexShrink: 0 }}/>

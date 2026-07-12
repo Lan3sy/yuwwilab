@@ -121,7 +121,7 @@ export default function Products({ session }) {
   } : null
 
   return (
-    <div style={{ padding: '24px 20px', background: '#e8e8ea', minHeight: '100vh' }}>
+    <div style={{ padding: '24px 20px', background: '#e8e8ea', minHeight: '100dvh' }}>
 
       <style>{`
         @keyframes fadeIn {
@@ -199,7 +199,7 @@ export default function Products({ session }) {
       ))}
 
       {showAdd && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0,height: '100dvh', background: 'rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setShowAdd(false)}>
           <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
@@ -240,7 +240,7 @@ export default function Products({ session }) {
       )}
 
       {addToDiary && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0,height: '100dvh', background: 'rgba(0,0,0,0.4)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setAddToDiary(null)}>
           <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',

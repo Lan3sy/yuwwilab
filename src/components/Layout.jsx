@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useLayoutEffect } from 'react'
 import { IconDiary, IconProducts, IconAnalytics, IconProfile } from './Icons'
 
 export const unsavedChanges = { current: false, label: '' }
@@ -24,7 +24,7 @@ export default function Layout({ children }) {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
   const itemRefs = useRef([])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const activeIndex = NAV_ITEMS.findIndex(t => t.path === location.pathname)
     if (activeIndex === -1) return
     const el = itemRefs.current[activeIndex]
@@ -50,7 +50,7 @@ export default function Layout({ children }) {
   return (
     <div style={{ paddingBottom: 80, background: '#e8e8ea', minHeight: '100vh' }}>
       {children}
-
+      
       <div style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 480, zIndex: 100,
