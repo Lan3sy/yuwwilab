@@ -37,7 +37,7 @@ const CATEGORIES = [
   { key: 'cardio', label: 'Кардио' },
 ]
 
-const SET_DURATION_MIN = 3 // среднее время на подход с отдыхом
+const SET_DURATION_MIN = 3
 
 const estimateExerciseMinutes = (sets) => (sets || 3) * SET_DURATION_MIN
 
@@ -47,13 +47,13 @@ const calcExerciseCalories = (met, bodyWeightKg, sets) => {
 }
 
 export default function WorkoutManager({ session, profile, onClose, onLogged }) {
-  const [tab, setTab] = useState('plan') // plan | today | programs | library
-  const [plan, setPlan] = useState({}) // { 0: {title, exercises: []}, ... }
+  const [tab, setTab] = useState('plan')
+  const [plan, setPlan] = useState({})
   const [selectedDay, setSelectedDay] = useState(0)
   const [exercisesDb, setExercisesDb] = useState([])
   const [templates, setTemplates] = useState([])
   const [userPrograms, setUserPrograms] = useState([])
-  const [programDetails, setProgramDetails] = useState({}) // programId -> {dayOfWeek: {...}}
+  const [programDetails, setProgramDetails] = useState({})
   const [saving, setSaving] = useState(false)
 
   const [pickerOpen, setPickerOpen] = useState(false)
@@ -67,6 +67,7 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
   const [logs, setLogs] = useState([])
 
   const [quickAddDay, setQuickAddDay] = useState(null)
+
   const [doneMap, setDoneMap] = useState({})
   const [finished, setFinished] = useState(null)
 
@@ -80,12 +81,14 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
     loadTodayLog()
     loadLogs()
   }, [])
+
   useEffect(() => {
     const ex = plan[todayDow]?.exercises || []
     const initial = {}
     ex.forEach((_, i) => { initial[i] = true })
     setDoneMap(initial)
   }, [plan, todayDow])
+
   const loadPlan = async () => {
     const { data } = await supabase.from('workout_plan').select('*').eq('user_id', session.user.id)
     const map = {}
@@ -143,12 +146,12 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
   const loadLogs = async () => {
     const from = new Date(); from.setDate(from.getDate() - 27)
     const { data } = await supabase.from('workout_logs').select('*')
-      .eq('user_id', session.user.id).gte('date', from.toISOString().split('T')[0])
+      .eq('user_id', session.user.id)
+      .gte('date', from.toISOString().split('T')[0])
       .order('date', { ascending: false })
     setLogs(data || [])
   }
 
-  // ---- Редактирование плана ----
   const savePlanDay = async (dayIndex, newExercises, newTitle) => {
     const existing = plan[dayIndex]
     const payload = {
@@ -204,7 +207,6 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
     loadPlan()
   }
 
-  // ---- Программы ----
   const applyProgram = async (program) => {
     setSaving(true)
     const detail = await loadProgramDetail(program.id)
@@ -250,7 +252,6 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
     loadPrograms()
   }
 
-  // ---- Логирование тренировки ----
   const logWorkout = async (dayIndex) => {
     setSaving(true)
     const dayPlan = plan[dayIndex]
@@ -280,11 +281,13 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
     loadTodayLog(); loadLogs()
     if (onLogged) onLogged()
   }
+
   const finishWorkout = async () => {
     await logWorkout(todayDow)
     const praise = PRAISES[Math.floor(Math.random() * PRAISES.length)]
     setFinished(praise)
   }
+
   const removeTodayLog = async () => {
     if (!todayLog) return
     await supabase.from('workout_logs').delete().eq('id', todayLog.id)
@@ -308,22 +311,28 @@ export default function WorkoutManager({ session, profile, onClose, onLogged }) 
     }
   }, { minutes: 0, cal: 0 })
 
-const toggleDone = (i) => setDoneMap(prev => ({ ...prev, [i]: !prev[i] }))
+  const toggleDone = (i) => setDoneMap(prev => ({ ...prev, [i]: !prev[i] }))
 
   const plannedDaysCount = Object.values(plan).filter(d => d.exercises && d.exercises.length > 0).length
   const actualPerWeek = Math.round((logs.length / 4) * 10) / 10
   const totalBurned = logs.reduce((s, l) => s + (l.calories_burned || 0), 0)
+
+  const inputStyle = {
+    padding: '8px 10px', background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+    borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box', color: 'var(--color-text)'
+  }
+
   if (finished) {
     return (
       <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 24 }}>
-        <div style={{ background: '#fff', borderRadius: 24, padding: 32, textAlign: 'center',
+        <div className="glass-card" style={{ padding: 32, textAlign: 'center',
           maxWidth: 320, animation: 'popIn 0.3s ease' }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-          <p style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 8 }}>{finished}</p>
-          <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>Тренировка успешно засчитана</p>
-          <button onClick={onClose} style={{ width: '100%', padding: 14, background: '#111',
-            border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+          <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>{finished}</p>
+          <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 20 }}>Тренировка успешно засчитана</p>
+          <button onClick={onClose} className="glass-button-dark" style={{ width: '100%', padding: 14,
+            borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
             Отлично!
           </button>
         </div>
@@ -331,329 +340,299 @@ const toggleDone = (i) => setDoneMap(prev => ({ ...prev, [i]: !prev[i] }))
       </div>
     )
   }
-  const inputStyle = {
-    padding: '8px 10px', background: '#f9f9f9', border: '1.5px solid #ebebeb',
-    borderRadius: 8, fontSize: 13, outline: 'none', boxSizing: 'border-box'
-  }
 
   return (
-<>
-<style>{`
-  @keyframes overlayFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes sheetSlideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-`}</style>
-<div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
-      display: 'flex', alignItems: 'flex-end', zIndex: 300,
-      animation: 'overlayFadeIn 0.25s ease forwards' }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-        padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
-        maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
-        animation: 'sheetSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
+    <>
+      <style>{`
+        @keyframes overlayFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes sheetSlideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
+      <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
+        display: 'flex', alignItems: 'flex-end', zIndex: 300,
+        animation: 'overlayFadeIn 0.25s ease forwards' }}
+        onClick={e => e.target === e.currentTarget && onClose()}>
+        <div className="glass-sheet" style={{ padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
+          maxHeight: '90dvh', display: 'flex', flexDirection: 'column',
+          animation: 'sheetSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards' }}>
 
-        <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
-          margin: '0 auto 16px', flexShrink: 0 }}/>
+          <div style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2,
+            margin: '0 auto 16px', flexShrink: 0 }}/>
 
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexShrink: 0 }}>
-          {[['plan', 'План'], ['today', 'Сегодня'], ['programs', 'Программы'], ['library', 'Библиотека']].map(([key, label]) => (
-            <button key={key} onClick={() => setTab(key)} style={{
-              flex: 1, padding: '8px 4px', borderRadius: 10, border: 'none',
-              background: tab === key ? '#111' : '#f4f4f4',
-              color: tab === key ? '#fff' : '#555',
-              fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{label}</button>
-          ))}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexShrink: 0 }}>
+            {[['plan', 'План'], ['today', 'Сегодня'], ['programs', 'Программы'], ['library', 'Библиотека']].map(([key, label]) => (
+              <button key={key} onClick={() => setTab(key)}
+                className={tab === key ? 'glass-button-dark' : 'glass-button'} style={{
+                flex: 1, padding: '8px 4px', borderRadius: 10, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{label}</button>
+            ))}
+          </div>
+
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+
+            {/* ---- ПЛАН ---- */}
+            {tab === 'plan' && (
+              <div>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+                  {DAYS_SHORT.map((d, i) => (
+                    <button key={i} onClick={() => setSelectedDay(i)}
+                      className={selectedDay === i ? 'glass-button-dark' : 'glass-button'} style={{
+                      padding: '8px 12px', borderRadius: 20, fontWeight: 600, cursor: 'pointer', fontSize: 12, position: 'relative' }}>
+                      {d}
+                      {plan[i]?.exercises?.length > 0 && (
+                        <span style={{ position: 'absolute', top: -2, right: -2,
+                          width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)' }}/>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <input value={plan[selectedDay]?.title || ''}
+                  onChange={e => updateDayTitle(selectedDay, e.target.value)}
+                  onBlur={() => commitDayTitle(selectedDay)}
+                  placeholder={`Название дня (${DAYS[selectedDay]})`}
+                  style={{ ...inputStyle, width: '100%', marginBottom: 12, fontSize: 15, fontWeight: 600, padding: '10px 12px' }}/>
+
+                {(plan[selectedDay]?.exercises || []).length === 0 && (
+                  <p style={{ textAlign: 'center', color: 'var(--color-text-disabled)', padding: '20px 0', fontSize: 13 }}>
+                    День пуст. Добавь упражнения ниже
+                  </p>
+                )}
+
+                {(plan[selectedDay]?.exercises || []).map((ex, i) => (
+                  <div key={i} style={{ background: 'var(--color-surface)', borderRadius: 12, padding: 12, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)', margin: 0 }}>{ex.name}</p>
+                      <button onClick={() => removeExerciseFromDay(selectedDay, i)} style={{
+                        background: 'none', border: 'none', color: 'var(--color-text-disabled)', fontSize: 18, cursor: 'pointer' }}>×</button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+                      <div>
+                        <label style={{ fontSize: 9, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Подходы</label>
+                        <input type="number" value={ex.sets}
+                          onChange={e => updateExerciseField(selectedDay, i, 'sets', +e.target.value)}
+                          onBlur={() => commitExerciseField(selectedDay)}
+                          style={{ ...inputStyle, width: '100%' }}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 9, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Повторы</label>
+                        <input value={ex.reps}
+                          onChange={e => updateExerciseField(selectedDay, i, 'reps', e.target.value)}
+                          onBlur={() => commitExerciseField(selectedDay)}
+                          style={{ ...inputStyle, width: '100%' }}/>
+                      </div>
+                      <div>
+                        <label style={{ fontSize: 9, color: 'var(--color-text-secondary)', textTransform: 'uppercase' }}>Вес (кг)</label>
+                        <input type="number" value={ex.weight}
+                          onChange={e => updateExerciseField(selectedDay, i, 'weight', +e.target.value)}
+                          onBlur={() => commitExerciseField(selectedDay)}
+                          style={{ ...inputStyle, width: '100%' }}/>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                <button onClick={() => { setQuickAddDay(selectedDay); setPickerOpen(true) }}
+                  className="glass-button" style={{
+                  width: '100%', padding: 12, borderRadius: 10, fontWeight: 600, fontSize: 13, cursor: 'pointer', marginBottom: 16 }}>
+                  + Добавить упражнение
+                </button>
+
+                {(plan[selectedDay]?.exercises || []).length > 0 && (
+                  <button onClick={() => clearDay(selectedDay)} className="glass-button" style={{
+                    width: '100%', padding: 10, borderRadius: 10, color: 'var(--color-error)', fontWeight: 600, fontSize: 12, cursor: 'pointer', marginBottom: 12 }}>
+                    Очистить день
+                  </button>
+                )}
+
+                <button onClick={() => setShowSaveProgram(true)} className="glass-button" style={{
+                  width: '100%', padding: 12, borderRadius: 10, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+                  💾 Сохранить план как программу
+                </button>
+              </div>
+            )}
+
+            {/* ---- СЕГОДНЯ ---- */}
+            {tab === 'today' && (
+              <div>
+                <div style={{ background: 'var(--color-surface)', borderRadius: 14, padding: 16, marginBottom: 16 }}>
+                  <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '0 0 4px', fontWeight: 600, textTransform: 'uppercase' }}>
+                    {DAYS[todayDow]}
+                  </p>
+                  {todayExercises.length > 0 ? (
+                    <>
+                      <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', margin: '0 0 10px' }}>
+                        {todayPlan.title || 'Тренировка'}
+                      </p>
+                      {todayExercises.map((ex, i) => (
+                        <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={!!doneMap[i]} onChange={() => toggleDone(i)}
+                            style={{ width: 16, height: 16, accentColor: 'var(--color-primary)', cursor: 'pointer' }}/>
+                          <span style={{ fontSize: 13, color: doneMap[i] ? 'var(--color-text)' : 'var(--color-text-disabled)',
+                            textDecoration: doneMap[i] ? 'none' : 'line-through' }}>
+                            {ex.name} — {ex.sets}×{ex.reps}{ex.weight > 0 ? ` @ ${ex.weight}кг` : ''}
+                          </span>
+                        </label>
+                      ))}
+                    </>
+                  ) : (
+                    <p style={{ fontSize: 13, color: 'var(--color-text-disabled)' }}>На сегодня плана нет — настрой его во вкладке "План"</p>
+                  )}
+                </div>
+
+                {todayExercises.length > 0 && (
+                  <>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                      <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: 14 }}>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '0 0 4px', textTransform: 'uppercase' }}>Время</p>
+                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
+                          ~{Math.round(todayEstimate.minutes)} <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>мин</span>
+                        </p>
+                      </div>
+                      <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: 14 }}>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '0 0 4px', textTransform: 'uppercase' }}>Сожжётся</p>
+                        <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
+                          ~{Math.round(todayEstimate.cal)} <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>ккал</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <button onClick={finishWorkout} disabled={saving} className="glass-button-dark" style={{
+                      width: '100%', padding: 14, borderRadius: 12, fontWeight: 700, cursor: 'pointer' }}>
+                      {saving ? 'Сохранение...' : 'Закончить тренировку'}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ---- ПРОГРАММЫ ---- */}
+            {tab === 'programs' && (
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)', marginBottom: 10 }}>Готовые программы</p>
+                {templates.map(t => (
+                  <ProgramCard key={t.id} program={t} onApply={() => applyProgram(t)}
+                    onExpand={() => loadProgramDetail(t.id)} detail={programDetails[t.id]} saving={saving}/>
+                ))}
+
+                {userPrograms.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text)', marginTop: 20, marginBottom: 10 }}>
+                      Мои программы
+                    </p>
+                    {userPrograms.map(p => (
+                      <ProgramCard key={p.id} program={p} onApply={() => applyProgram(p)}
+                        onExpand={() => loadProgramDetail(p.id)} detail={programDetails[p.id]}
+                        onDelete={() => deleteUserProgram(p.id)} saving={saving}/>
+                    ))}
+                  </>
+                )}
+
+                {logs.length > 0 && (
+                  <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: 14, marginTop: 16 }}>
+                    <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: '0 0 6px', textTransform: 'uppercase' }}>За 4 недели</p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 13, color: 'var(--color-text)' }}>{actualPerWeek} трен/нед</span>
+                      <span style={{ fontSize: 13, color: 'var(--color-text)' }}>{totalBurned} ккал сожжено</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ---- БИБЛИОТЕКА ---- */}
+            {tab === 'library' && (
+              <div>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+                  {CATEGORIES.map(c => (
+                    <button key={c.key} onClick={() => setPickerCategory(c.key)}
+                      className={pickerCategory === c.key ? 'glass-button-dark' : 'glass-button'} style={{
+                      padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{c.label}</button>
+                  ))}
+                </div>
+                {exercisesDb.filter(e => e.category === pickerCategory).map(ex => (
+                  <div key={ex.id} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: '10px 14px',
+                    marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)', margin: '0 0 2px' }}>{ex.name}</p>
+                      <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: 0 }}>{ex.equipment}</p>
+                    </div>
+                    <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: 0, alignSelf: 'center' }}>MET {ex.met}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button onClick={onClose} className="glass-button" style={{
+            width: '100%', padding: 14, borderRadius: 12, fontWeight: 600, cursor: 'pointer', marginTop: 16, flexShrink: 0 }}>
+            Закрыть
+          </button>
         </div>
 
-        <div style={{ overflowY: 'auto', flex: 1 }}>
+        {/* Модалка выбора упражнения */}
+        {pickerOpen && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'flex-end', zIndex: 310 }}
+            onClick={e => e.target === e.currentTarget && setPickerOpen(false)}>
+            <div className="glass-sheet" style={{ padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '80dvh',
+              display: 'flex', flexDirection: 'column' }}>
+              <div style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2, margin: '0 auto 16px' }}/>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 12 }}>Выбери упражнение</h3>
 
-          {/* ---- ПЛАН ---- */}
-          {tab === 'plan' && (
-            <div>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-                {DAYS_SHORT.map((d, i) => (
-                  <button key={i} onClick={() => setSelectedDay(i)} style={{
-                    padding: '8px 12px', borderRadius: 20, border: 'none',
-                    background: selectedDay === i ? '#111' : '#f4f4f4',
-                    color: selectedDay === i ? '#fff' : '#555',
-                    fontWeight: 600, cursor: 'pointer', fontSize: 12, position: 'relative' }}>
-                    {d}
-                    {plan[i]?.exercises?.length > 0 && (
-                      <span style={{ position: 'absolute', top: -2, right: -2,
-                        width: 6, height: 6, borderRadius: '50%', background: '#4ade80' }}/>
-                    )}
+              <input value={pickerSearch} onChange={e => setPickerSearch(e.target.value)}
+                placeholder="Поиск..." style={{ ...inputStyle, width: '100%', marginBottom: 10, padding: '10px 12px' }}/>
+
+              <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+                {CATEGORIES.map(c => (
+                  <button key={c.key} onClick={() => setPickerCategory(c.key)}
+                    className={pickerCategory === c.key ? 'glass-button-dark' : 'glass-button'} style={{
+                    padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{c.label}</button>
+                ))}
+              </div>
+
+              <div style={{ overflowY: 'auto', flex: 1 }}>
+                {filteredExercises.map(ex => (
+                  <button key={ex.id} onClick={() => addExerciseToDay(quickAddDay, ex)} style={{
+                    width: '100%', padding: '10px 14px', background: 'var(--color-surface)', border: 'none',
+                    borderRadius: 10, marginBottom: 6, textAlign: 'left', cursor: 'pointer',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)' }}>{ex.name}</span>
+                    <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{ex.equipment}</span>
                   </button>
                 ))}
               </div>
-
-              <input value={plan[selectedDay]?.title || ''}
-                onChange={e => updateDayTitle(selectedDay, e.target.value)}
-                onBlur={() => commitDayTitle(selectedDay)}
-                placeholder={`Название дня (${DAYS[selectedDay]})`}
-                style={{ ...inputStyle, width: '100%', marginBottom: 12, fontSize: 15, fontWeight: 600, padding: '10px 12px' }}/>
-
-              {(plan[selectedDay]?.exercises || []).length === 0 && (
-                <p style={{ textAlign: 'center', color: '#ccc', padding: '20px 0', fontSize: 13 }}>
-                  День пуст. Добавь упражнения ниже
-                </p>
-              )}
-
-              {(plan[selectedDay]?.exercises || []).map((ex, i) => (
-                <div key={i} style={{ background: '#f9f9f9', borderRadius: 12, padding: 12, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: '#111', margin: 0 }}>{ex.name}</p>
-                    <button onClick={() => removeExerciseFromDay(selectedDay, i)} style={{
-                      background: 'none', border: 'none', color: '#ddd', fontSize: 18, cursor: 'pointer' }}>×</button>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
-                    <div>
-                      <label style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase' }}>Подходы</label>
-                      <input type="number" value={ex.sets}
-                        onChange={e => updateExerciseField(selectedDay, i, 'sets', +e.target.value)}
-                        onBlur={() => commitExerciseField(selectedDay)}
-                        style={{ ...inputStyle, width: '100%' }}/>
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase' }}>Повторы</label>
-                      <input value={ex.reps}
-                        onChange={e => updateExerciseField(selectedDay, i, 'reps', e.target.value)}
-                        onBlur={() => commitExerciseField(selectedDay)}
-                        style={{ ...inputStyle, width: '100%' }}/>
-                    </div>
-                    <div>
-                      <label style={{ fontSize: 9, color: '#aaa', textTransform: 'uppercase' }}>Вес (кг)</label>
-                      <input type="number" value={ex.weight}
-                        onChange={e => updateExerciseField(selectedDay, i, 'weight', +e.target.value)}
-                        onBlur={() => commitExerciseField(selectedDay)}
-                        style={{ ...inputStyle, width: '100%' }}/>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button onClick={() => { setQuickAddDay(selectedDay); setPickerOpen(true) }} style={{
-                width: '100%', padding: 12, background: '#f4f4f4', border: 'none',
-                borderRadius: 10, color: '#111', fontWeight: 600, fontSize: 13, cursor: 'pointer', marginBottom: 16 }}>
-                + Добавить упражнение
-              </button>
-
-              {(plan[selectedDay]?.exercises || []).length > 0 && (
-                <button onClick={() => clearDay(selectedDay)} style={{
-                  width: '100%', padding: 10, background: 'none', border: '1.5px solid #ffcccc',
-                  borderRadius: 10, color: '#ff4444', fontWeight: 600, fontSize: 12, cursor: 'pointer', marginBottom: 12 }}>
-                  Очистить день
-                </button>
-              )}
-
-              <button onClick={() => setShowSaveProgram(true)} style={{
-                width: '100%', padding: 12, background: 'none', border: '1.5px solid #ebebeb',
-                borderRadius: 10, color: '#555', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
-                💾 Сохранить план как программу
-              </button>
-            </div>
-          )}
-
-          {/* ---- СЕГОДНЯ ---- */}
-          {tab === 'today' && (
-            <div>
-              <div style={{ background: '#f9f9f9', borderRadius: 14, padding: 16, marginBottom: 16 }}>
-                <p style={{ fontSize: 12, color: '#888', margin: '0 0 4px', fontWeight: 600, textTransform: 'uppercase' }}>
-                  {DAYS[todayDow]}
-                </p>
-                {todayExercises.length > 0 ? (
-                  <>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: '#111', margin: '0 0 10px' }}>
-                      {todayPlan.title || 'Тренировка'}
-                    </p>
-                    {todayExercises.map((ex, i) => (
-                      <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={!!doneMap[i]} onChange={() => toggleDone(i)}
-                          style={{ width: 16, height: 16, accentColor: '#111', cursor: 'pointer' }}/>
-                        <span style={{ fontSize: 13, color: doneMap[i] ? '#111' : '#aaa',
-                          textDecoration: doneMap[i] ? 'none' : 'line-through' }}>
-                          {ex.name} — {ex.sets}×{ex.reps}{ex.weight > 0 ? ` @ ${ex.weight}кг` : ''}
-                        </span>
-                      </label>
-                    ))}
-                  </>
-                ) : (
-                  <p style={{ fontSize: 13, color: '#aaa' }}>На сегодня плана нет — настрой его во вкладке "План"</p>
-                )}
-              </div>
-
-              {todayExercises.length > 0 && (
-                <>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-                    <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 14 }}>
-                      <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase' }}>Время</p>
-                      <p style={{ fontSize: 20, fontWeight: 700, color: '#111', margin: 0 }}>
-                        ~{Math.round(todayEstimate.minutes)} <span style={{ fontSize: 12, color: '#aaa' }}>мин</span>
-                      </p>
-                    </div>
-                    <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 14 }}>
-                      <p style={{ fontSize: 11, color: '#888', margin: '0 0 4px', textTransform: 'uppercase' }}>Сожжётся</p>
-                      <p style={{ fontSize: 20, fontWeight: 700, color: '#111', margin: 0 }}>
-                        ~{Math.round(todayEstimate.cal)} <span style={{ fontSize: 12, color: '#aaa' }}>ккал</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    {todayLog && (
-                      <button onClick={removeTodayLog} style={{
-                        flex: 1, padding: 14, background: 'none', border: '1.5px solid #ffcccc',
-                        borderRadius: 12, color: '#ff4444', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
-                        Отменить
-                      </button>
-                    )}
-                    <button onClick={finishWorkout} disabled={saving} style={{
-                      flex: 2, padding: 14, background: '#111', border: 'none',
-                      borderRadius: 12, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
-                      {saving ? 'Сохранение...' : 'Закончить тренировку'}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {/* ---- ПРОГРАММЫ ---- */}
-          {tab === 'programs' && (
-            <div>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 10 }}>Готовые программы</p>
-              {templates.map(t => (
-                <ProgramCard key={t.id} program={t} onApply={() => applyProgram(t)}
-                  onExpand={() => loadProgramDetail(t.id)} detail={programDetails[t.id]} saving={saving}/>
-              ))}
-
-              {userPrograms.length > 0 && (
-                <>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: '#111', marginTop: 20, marginBottom: 10 }}>
-                    Мои программы
-                  </p>
-                  {userPrograms.map(p => (
-                    <ProgramCard key={p.id} program={p} onApply={() => applyProgram(p)}
-                      onExpand={() => loadProgramDetail(p.id)} detail={programDetails[p.id]}
-                      onDelete={() => deleteUserProgram(p.id)} saving={saving}/>
-                  ))}
-                </>
-              )}
-            </div>
-          )}
-
-          {/* ---- БИБЛИОТЕКА (просмотр) ---- */}
-          {tab === 'library' && (
-            <div>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
-                {CATEGORIES.map(c => (
-                  <button key={c.key} onClick={() => setPickerCategory(c.key)} style={{
-                    padding: '6px 12px', borderRadius: 20, border: 'none',
-                    background: pickerCategory === c.key ? '#111' : '#f4f4f4',
-                    color: pickerCategory === c.key ? '#fff' : '#555',
-                    fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{c.label}</button>
-                ))}
-              </div>
-              {exercisesDb.filter(e => e.category === pickerCategory).map(ex => (
-                <div key={ex.id} style={{ background: '#f9f9f9', borderRadius: 10, padding: '10px 14px',
-                  marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
-                  <div>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: '#111', margin: '0 0 2px' }}>{ex.name}</p>
-                    <p style={{ fontSize: 11, color: '#aaa', margin: 0 }}>{ex.equipment}</p>
-                  </div>
-                  <p style={{ fontSize: 11, color: '#888', margin: 0, alignSelf: 'center' }}>MET {ex.met}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Аналитика внизу на вкладке "Программы" */}
-        {tab === 'programs' && logs.length > 0 && (
-          <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 14, margin: '12px 0', flexShrink: 0 }}>
-            <p style={{ fontSize: 11, color: '#888', margin: '0 0 6px', textTransform: 'uppercase' }}>За 4 недели</p>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 13, color: '#555' }}>{actualPerWeek} трен/нед</span>
-              <span style={{ fontSize: 13, color: '#555' }}>{totalBurned} ккал сожжено</span>
             </div>
           </div>
         )}
 
-        <button onClick={onClose} style={{
-          width: '100%', padding: 14, background: '#f4f4f4', border: 'none',
-          borderRadius: 12, color: '#555', fontWeight: 600, cursor: 'pointer', marginTop: 12, flexShrink: 0 }}>
-          Закрыть
-        </button>
-      </div>
-
-      {/* Модалка выбора упражнения */}
-      {pickerOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'flex-end', zIndex: 310 }}
-          onClick={e => e.target === e.currentTarget && setPickerOpen(false)}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '80vh',
-            display: 'flex', flexDirection: 'column' }}>
-            <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2, margin: '0 auto 16px' }}/>
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Выбери упражнение</h3>
-
-            <input value={pickerSearch} onChange={e => setPickerSearch(e.target.value)}
-              placeholder="Поиск..." style={{ ...inputStyle, width: '100%', marginBottom: 10, padding: '10px 12px' }}/>
-
-            <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
-              {CATEGORIES.map(c => (
-                <button key={c.key} onClick={() => setPickerCategory(c.key)} style={{
-                  padding: '6px 12px', borderRadius: 20, border: 'none',
-                  background: pickerCategory === c.key ? '#111' : '#f4f4f4',
-                  color: pickerCategory === c.key ? '#fff' : '#555',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>{c.label}</button>
-              ))}
-            </div>
-
-            <div style={{ overflowY: 'auto', flex: 1 }}>
-              {filteredExercises.map(ex => (
-                <button key={ex.id} onClick={() => addExerciseToDay(quickAddDay, ex)} style={{
-                  width: '100%', padding: '10px 14px', background: '#f9f9f9', border: 'none',
-                  borderRadius: 10, marginBottom: 6, textAlign: 'left', cursor: 'pointer',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#111' }}>{ex.name}</span>
-                  <span style={{ fontSize: 11, color: '#aaa' }}>{ex.equipment}</span>
+        {/* Модалка сохранения программы */}
+        {showSaveProgram && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 320, padding: 24 }}
+            onClick={e => e.target === e.currentTarget && setShowSaveProgram(false)}>
+            <div className="glass-card" style={{ padding: 24, width: '100%', maxWidth: 340 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text)', marginBottom: 12 }}>Название программы</h3>
+              <input value={newProgramName} onChange={e => setNewProgramName(e.target.value)}
+                placeholder="Например: Моя программа" autoFocus
+                style={{ ...inputStyle, width: '100%', marginBottom: 16, padding: '12px 14px', fontSize: 14 }}/>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={() => setShowSaveProgram(false)} className="glass-button" style={{
+                  flex: 1, padding: 12, borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Отмена</button>
+                <button onClick={saveCurrentPlanAsProgram} disabled={saving} className="glass-button-dark" style={{
+                  flex: 1, padding: 12, borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>
+                  {saving ? '...' : 'Сохранить'}
                 </button>
-              ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Модалка сохранения программы */}
-      {showSaveProgram && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 320, padding: 24 }}
-          onClick={e => e.target === e.currentTarget && setShowSaveProgram(false)}>
-          <div style={{ background: '#fff', borderRadius: 20, padding: 24, width: '100%', maxWidth: 340 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Название программы</h3>
-            <input value={newProgramName} onChange={e => setNewProgramName(e.target.value)}
-              placeholder="Например: Моя программа" autoFocus
-              style={{ ...inputStyle, width: '100%', marginBottom: 16, padding: '12px 14px', fontSize: 14 }}/>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setShowSaveProgram(false)} style={{
-                flex: 1, padding: 12, background: '#f4f4f4', border: 'none',
-                borderRadius: 10, color: '#555', fontWeight: 600, cursor: 'pointer' }}>Отмена</button>
-              <button onClick={saveCurrentPlanAsProgram} disabled={saving} style={{
-                flex: 1, padding: 12, background: '#111', border: 'none',
-                borderRadius: 10, color: '#fff', fontWeight: 600, cursor: 'pointer' }}>
-                {saving ? '...' : 'Сохранить'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  </>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -666,25 +645,25 @@ function ProgramCard({ program, onApply, onExpand, detail, onDelete, saving }) {
   }
 
   return (
-    <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 14, marginBottom: 8 }}>
+    <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: 14, marginBottom: 8 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button onClick={toggle} style={{ background: 'none', border: 'none', textAlign: 'left', flex: 1, cursor: 'pointer' }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#111', margin: '0 0 2px' }}>{program.name}</p>
-          <p style={{ fontSize: 11, color: '#aaa', margin: 0 }}>{program.description}</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text)', margin: '0 0 2px' }}>{program.name}</p>
+          <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: 0 }}>{program.description}</p>
         </button>
         {onDelete && (
-          <button onClick={onDelete} style={{ background: 'none', border: 'none', color: '#ddd', fontSize: 18, cursor: 'pointer' }}>×</button>
+          <button onClick={onDelete} style={{ background: 'none', border: 'none', color: 'var(--color-text-disabled)', fontSize: 18, cursor: 'pointer' }}>×</button>
         )}
       </div>
 
       {expanded && detail && (
-        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #eee' }}>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--color-border)' }}>
           {Object.entries(detail).map(([dow, d]) => (
             <div key={dow} style={{ marginBottom: 6 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: '#555', margin: '0 0 2px' }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text)', margin: '0 0 2px' }}>
                 {DAYS_SHORT[dow]}: {d.title}
               </p>
-              <p style={{ fontSize: 11, color: '#999', margin: 0 }}>
+              <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: 0 }}>
                 {d.exercises.map(e => e.name).join(', ')}
               </p>
             </div>
@@ -692,9 +671,8 @@ function ProgramCard({ program, onApply, onExpand, detail, onDelete, saving }) {
         </div>
       )}
 
-      <button onClick={onApply} disabled={saving} style={{
-        width: '100%', padding: 10, background: '#111', border: 'none',
-        borderRadius: 8, color: '#fff', fontWeight: 600, fontSize: 12, cursor: 'pointer', marginTop: 8 }}>
+      <button onClick={onApply} disabled={saving} className="glass-button-dark" style={{
+        width: '100%', padding: 10, borderRadius: 8, fontWeight: 600, fontSize: 12, cursor: 'pointer', marginTop: 8 }}>
         {saving ? '...' : 'Применить эту программу'}
       </button>
     </div>
