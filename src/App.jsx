@@ -8,6 +8,10 @@ import Profile from './pages/Profile'
 import Analytics from './pages/Analytics'
 import Layout from './components/Layout'
 import SplashScreen from './components/SplashScreen'
+import LiquidBackground from './components/LiquidBackground'
+import { ThemeProvider, useTheme } from './components/ThemeProvider'
+import SnowBackground from './components/SnowBackground'
+import CharcoalBackground from './components/CharcoalBackground'
 
 const ROUTES = ['/', '/products', '/analytics', '/profile']
 
@@ -49,16 +53,15 @@ function AnimatedRoutes({ session }) {
     <div
       onTransitionEnd={onTransitionEnd}
       style={{
+        background: 'transparent',
+        minHeight: '100vh',
         transform:
           stage === "out"
             ? "translateX(-4%)"
             : "translateX(0)",
-
         opacity: stage === "out" ? 0 : 1,
-
         transition:
           "transform .24s cubic-bezier(.22,1,.36,1), opacity .24s ease",
-
         willChange: "transform, opacity"
       }}
     >
@@ -73,10 +76,11 @@ function AnimatedRoutes({ session }) {
   )
 }
 
-export default function App() {
+function AppContent() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [showSplash, setShowSplash] = useState(true)
+  const { theme } = useTheme()
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -88,13 +92,9 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />
-  }
-
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-      height: '100vh', background: '#e8e8ea' }}>
+      height: '100vh', background: 'var(--color-bg)' }}>
       <div style={{ fontSize: 32, animation: 'pulse 1.5s infinite' }}>🥗</div>
       <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }`}</style>
     </div>
@@ -103,8 +103,19 @@ export default function App() {
   if (!session) return <Auth />
 
   return (
-    <Layout>
-      <AnimatedRoutes session={session} />
-    </Layout>
+    <>
+      {theme === 'charcoal' ? <CharcoalBackground /> : <SnowBackground />}
+      <Layout>
+        <AnimatedRoutes session={session} />
+      </Layout>
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   )
 }

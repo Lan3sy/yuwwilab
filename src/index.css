@@ -20,11 +20,12 @@
   --carbs: #ce93d8;
 }
 html {
-  background: #e8e8ea;
+  background: transparent;
 }
+
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: transparent;
+  color: var(--color-text);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   min-height: 100vh;
   max-width: 480px;
@@ -60,3 +61,155 @@ button { cursor: pointer; }
 *::-webkit-scrollbar {
   display: none;
 }
+
+.glass-card {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 22px;
+  box-shadow: 0 4px 24px rgba(31,38,55,0.06), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+.glass-nav {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.4);
+  box-shadow: 0 -4px 24px rgba(31,38,55,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.glass-sheet {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(32px) saturate(1.5);
+  -webkit-backdrop-filter: blur(32px) saturate(1.5);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 32px rgba(31,38,55,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.glass-button {
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.4);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease, background 0.15s ease;
+}
+.glass-button:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+
+.glass-button-dark {
+  background: rgba(20,20,25,0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.15s ease;
+}
+.glass-button-dark:active {
+  transform: scale(0.96);
+  opacity: 0.85;
+}
+
+/* ===== ТЕМА: SNOW (светлая, по умолчанию) ===== */
+:root,
+[data-theme="snow"] {
+  --color-bg: #FFFFF7;
+  --color-bg-alt: #E7E7DD;
+  --color-surface: rgba(255,255,255,0.6);
+  --color-card: rgba(255,255,255,0.55);
+  --color-border: rgba(29,29,27,0.08);
+  --color-primary: #1D1D1B;
+  --color-secondary: #4a4a46;
+  --color-accent: #8a8a82;
+  --color-text: #1D1D1B;
+  --color-text-secondary: #6b6b64;
+  --color-text-disabled: #a8a89f;
+  --color-success: #6b9b7a;
+  --color-warning: #c9a35a;
+  --color-error: #b0554a;
+  --shadow-card: 0 4px 24px rgba(29,29,27,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+  --shadow-nav: 0 -4px 24px rgba(29,29,27,0.05), inset 0 1px 0 rgba(255,255,255,0.7);
+  --blur-card: 24px;
+  --blur-nav: 28px;
+  --radius-card: 22px;
+  --radius-sheet: 24px;
+  --radius-button: 14px;
+}
+
+/* ===== ТЕМА: ROYAL CHARCOAL (тёмная) ===== */
+[data-theme="charcoal"] {
+  --color-bg: #1e1f22;
+  --color-bg-alt: #1e2023;
+  --color-surface: rgba(76,78,81,0.28);
+  --color-card: rgba(71,72,76,0.32);
+  --color-border: rgba(255,255,255,0.08);
+  --color-primary: #e8e9eb;
+  --color-secondary: #b8b9bd;
+  --color-accent: #75767a;
+  --color-text: #e8e9eb;
+  --color-text-secondary: #9a9ba0;
+  --color-text-disabled: #5a5b5e;
+  --color-success: #7fae8c;
+  --color-warning: #c9a35a;
+  --color-error: #c47268;
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  --shadow-nav: 0 -8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  --blur-card: 28px;
+  --blur-nav: 32px;
+  --radius-card: 22px;
+  --radius-sheet: 24px;
+  --radius-button: 16px;
+}
+
+/* Универсальные классы, использующие токены */
+.glass-card {
+  background: var(--color-card);
+  backdrop-filter: blur(var(--blur-card));
+  -webkit-backdrop-filter: blur(var(--blur-card));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-nav {
+  background: var(--color-surface);
+  backdrop-filter: blur(var(--blur-nav)) saturate(1.3);
+  -webkit-backdrop-filter: blur(var(--blur-nav)) saturate(1.3);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-nav);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-sheet {
+  background: var(--color-surface);
+  backdrop-filter: blur(calc(var(--blur-card) + 8px)) saturate(1.4);
+  -webkit-backdrop-filter: blur(calc(var(--blur-card) + 8px)) saturate(1.4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  box-shadow: var(--shadow-nav);
+  color: var(--color-text);
+}
+
+.glass-button {
+  background: var(--color-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius-button);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease, background 0.2s ease;
+}
+.glass-button:active { transform: scale(0.96); opacity: 0.8; }
+
+.glass-button-dark {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+.glass-button-dark:active { transform: scale(0.96); opacity: 0.85; }

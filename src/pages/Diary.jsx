@@ -14,7 +14,7 @@ const IconWorkout = ({ size = 20, color = 'currentColor' }) => (
 
 function useDragToClose(onClose) {
   const [translateY, setTranslateY] = useState(0)
-  const [phase, setPhase] = useState('idle') // idle | dragging | returning | closing
+  const [phase, setPhase] = useState('idle')
   const sheetRef = useRef(null)
   const startY = useRef(0)
   const startTranslate = useRef(0)
@@ -434,7 +434,7 @@ export default function Diary({ session }) {
   })
 
   return (
-    <div style={{ padding: '24px 20px', background: '#e8e8ea', minHeight: '100vh' }}>
+    <div style={{ padding: '24px 20px', minHeight: '100vh' }}>
 
       <style>{`
         @keyframes fadeIn {
@@ -462,81 +462,74 @@ export default function Diary({ session }) {
       <div style={{ ...fadeStyle(0), marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <h2 style={{ fontSize: 24, fontWeight: 700, color: '#111', margin: 0 }}>Дневник</h2>
-            <p style={{ fontSize: 13, color: '#888', margin: '2px 0 0' }}>{dayLabel(selectedDate)}</p>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>Дневник</h2>
+            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>{dayLabel(selectedDate)}</p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setShowWorkout(true)} style={{
-              background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 12,
-              color: '#555', fontWeight: 600, padding: '10px 14px', fontSize: 13, cursor: 'pointer',
+            <button onClick={() => setShowWorkout(true)} className="glass-button" style={{
+              borderRadius: 14, fontWeight: 600, padding: '10px 14px', fontSize: 13, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <IconWorkout size={17} color="#555" />
+              <IconWorkout size={17} color="var(--color-text-secondary)" />
             </button>
-            <button onClick={() => setShowMealEditor(true)} style={{
-              background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 12,
-              color: '#555', fontWeight: 600, padding: '10px 14px', fontSize: 13, cursor: 'pointer',
+            <button onClick={() => setShowMealEditor(true)} className="glass-button" style={{
+              borderRadius: 14, fontWeight: 600, padding: '10px 14px', fontSize: 13, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <IconSettings size={17} color="#555" />
+              <IconSettings size={17} color="var(--color-text-secondary)" />
             </button>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 14 }}>
-          <button onClick={goToPrevDay} style={{
-            background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 10,
-            width: 36, height: 36, fontSize: 16, cursor: 'pointer',
+          <button onClick={goToPrevDay} className="glass-button" style={{
+            borderRadius: 12, width: 36, height: 36, fontSize: 16, cursor: 'pointer', color: 'var(--color-text)',
             display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
 
-          <button onClick={() => { setShowCalendar(true); loadCalendarStats() }} style={{
-            flex: 1, background: '#fff', border: '1.5px solid #ebebeb', borderRadius: 10,
-            padding: '8px 14px', fontSize: 13, fontWeight: 600, color: '#111',
+          <button onClick={() => { setShowCalendar(true); loadCalendarStats() }} className="glass-button" style={{
+            flex: 1, borderRadius: 12, padding: '8px 14px', fontSize: 13, fontWeight: 600, color: 'var(--color-text)',
             cursor: 'pointer', textAlign: 'center',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            <IconCalendar size={16} color="#111" />
+            <IconCalendar size={16} color="var(--color-text)" />
             {selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}
           </button>
 
-          <button onClick={goToNextDay} disabled={isToday} style={{
-            background: isToday ? '#f4f4f4' : '#fff', border: '1.5px solid #ebebeb', borderRadius: 10,
-            width: 36, height: 36, fontSize: 16, cursor: isToday ? 'default' : 'pointer',
-            color: isToday ? '#ccc' : '#111',
+          <button onClick={goToNextDay} disabled={isToday} className="glass-button" style={{
+            borderRadius: 12, width: 36, height: 36, fontSize: 16, cursor: isToday ? 'default' : 'pointer',
+            color: isToday ? 'var(--color-text-disabled)' : 'var(--color-text)', opacity: isToday ? 0.5 : 1,
             display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
 
           {!isToday && (
-            <button onClick={() => setSelectedDate(new Date())} style={{
-              background: '#111', border: 'none', borderRadius: 10,
-              padding: '8px 12px', fontSize: 12, fontWeight: 600,
-              color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>Сегодня</button>
+            <button onClick={() => setSelectedDate(new Date())} className="glass-button-dark" style={{
+              borderRadius: 12, padding: '8px 12px', fontSize: 12, fontWeight: 600,
+              cursor: 'pointer', whiteSpace: 'nowrap' }}>Сегодня</button>
           )}
         </div>
       </div>
 
       {/* Прогресс калорий */}
-      <div style={{ ...fadeStyle(60), background: '#fff', borderRadius: 20, padding: '20px 24px',
-        marginBottom: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div className="glass-card" style={{ ...fadeStyle(60), padding: '20px 24px', marginBottom: 12 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
-            <p style={{ fontSize: 12, fontWeight: 600, color: '#888', margin: '0 0 2px',
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-secondary)', margin: '0 0 2px',
               textTransform: 'uppercase', letterSpacing: '0.06em' }}>Калории</p>
-            <p style={{ fontSize: 32, fontWeight: 700, color: '#111', margin: 0 }}>
+            <p style={{ fontSize: 32, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
               <CountUp value={Math.round(totals.cal)} />
-              <span style={{ fontSize: 14, color: '#aaa', fontWeight: 400 }}> / {calGoal}</span>
+              <span style={{ fontSize: 14, color: 'var(--color-text-secondary)', fontWeight: 400 }}> / {calGoal}</span>
             </p>
-            <p style={{ fontSize: 12, color: '#888', margin: '2px 0 0' }}>
+            <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '2px 0 0' }}>
               {isToday
                 ? <>осталось <CountUp value={Math.round(remaining)} /> ккал</>
                 : <><CountUp value={Math.round(rawProgress)} />% от нормы</>
               }
             </p>
             {burnedToday > 0 && (
-              <p style={{ fontSize: 11, color: '#4ade80', margin: '4px 0 0', fontWeight: 600,
+              <p style={{ fontSize: 11, color: 'var(--color-success)', margin: '4px 0 0', fontWeight: 600,
                 display: 'flex', alignItems: 'center', gap: 4 }}>
-                <IconWorkout size={12} color="#4ade80" /> +{burnedToday} ккал от тренировки
+                <IconWorkout size={12} color="var(--color-success)" /> +{burnedToday} ккал от тренировки
               </p>
             )}
           </div>
           <svg width="72" height="72" viewBox="0 0 72 72">
-            <circle cx="36" cy="36" r="30" fill="none" stroke="#f0f0f0" strokeWidth="7"/>
+            <circle cx="36" cy="36" r="30" fill="none" stroke="var(--color-border)" strokeWidth="7"/>
             <circle cx="36" cy="36" r="30" fill="none" stroke={progressColor} strokeWidth="7"
               strokeDasharray={`${2 * Math.PI * 30}`}
               strokeDashoffset={`${2 * Math.PI * 30 * (1 - progress / 100)}`}
@@ -547,7 +540,7 @@ export default function Diary({ session }) {
             </text>
           </svg>
         </div>
-        <div style={{ background: '#f0f0f0', borderRadius: 6, height: 6 }}>
+        <div style={{ background: 'var(--color-border)', borderRadius: 6, height: 6 }}>
           <div style={{ background: progressColor, borderRadius: 6, height: 6,
             width: `${progress}%`, transition: 'width 0.6s ease, background 0.6s ease' }}/>
         </div>
@@ -556,15 +549,14 @@ export default function Diary({ session }) {
       {/* КБЖУ */}
       <div style={{ ...fadeStyle(120), display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 20 }}>
         {macros.map(item => (
-          <div key={item.label} style={{ background: '#fff', borderRadius: 14, padding: 12,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-            <p style={{ fontSize: 10, fontWeight: 600, color: '#888', margin: '0 0 4px',
+          <div key={item.label} className="glass-card" style={{ padding: 12, borderRadius: 18 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-text-secondary)', margin: '0 0 4px',
               textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</p>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#111', margin: '0 0 2px' }}>
+            <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', margin: '0 0 2px' }}>
               <CountUp value={Math.round(item.value)} />
             </p>
-            <p style={{ fontSize: 10, color: '#bbb', margin: '0 0 6px' }}>из {item.goal}г</p>
-            <div style={{ background: '#f0f0f0', borderRadius: 3, height: 3 }}>
+            <p style={{ fontSize: 10, color: 'var(--color-text-disabled)', margin: '0 0 6px' }}>из {item.goal}г</p>
+            <div style={{ background: 'var(--color-border)', borderRadius: 3, height: 3 }}>
               <div style={{ background: item.color, borderRadius: 3, height: 3,
                 width: `${Math.min(item.value / item.goal * 100, 100)}%`, transition: 'width 0.6s ease' }}/>
             </div>
@@ -574,9 +566,9 @@ export default function Diary({ session }) {
 
       {/* Приёмы пищи */}
       {meals.length === 0 && (
-        <div style={{ ...fadeStyle(160), textAlign: 'center', padding: 40, color: '#ccc' }}>
+        <div style={{ ...fadeStyle(160), textAlign: 'center', padding: 40, color: 'var(--color-text-disabled)' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-            <IconSettings size={32} color="#ccc" />
+            <IconSettings size={32} color="var(--color-text-disabled)" />
           </div>
           <p style={{ fontSize: 14 }}>Нет приёмов пищи. Настрой их через шестерёнку</p>
         </div>
@@ -587,72 +579,62 @@ export default function Diary({ session }) {
         const mealCal = Math.round(items.reduce((s, e) => s + (e.calories || 0), 0))
         return (
           <div key={meal.id}
-            className={removingMealId === meal.id ? 'meal-removing' : ''}
-            style={{
-              ...fadeStyle(160 + index * 50),
-              background: '#fff', borderRadius: 16, marginBottom: 10,
-              boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden'
-            }}>
+            className={`glass-card ${removingMealId === meal.id ? 'meal-removing' : ''}`}
+            style={{ ...fadeStyle(160 + index * 50), marginBottom: 10, overflow: 'hidden' }}>
             <div style={{ padding: '14px 16px', display: 'flex',
               justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {(() => {
                   const MealIcon = MEAL_ICON_POOL[index % MEAL_ICON_POOL.length]
-                  return <MealIcon size={19} color="#333" />
+                  return <MealIcon size={19} color="var(--color-text)" />
                 })()}
-                <p style={{ fontWeight: 700, color: '#111', margin: 0, fontSize: 15 }}>{meal.name}</p>
+                <p style={{ fontWeight: 700, color: 'var(--color-text)', margin: 0, fontSize: 15 }}>{meal.name}</p>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <p style={{ fontSize: 13, color: mealCal > 0 ? '#111' : '#ccc', fontWeight: 600, margin: 0 }}>
+                <p style={{ fontSize: 13, color: mealCal > 0 ? 'var(--color-text)' : 'var(--color-text-disabled)', fontWeight: 600, margin: 0 }}>
                   {mealCal > 0 ? <><CountUp value={mealCal} /> ккал</> : '—'}
                 </p>
                 {isToday && (
-                  <button onClick={() => openAddFor(meal.id)} style={{
-                    background: '#111', border: 'none', borderRadius: 8,
-                    width: 28, height: 28, color: '#fff', fontSize: 16,
+                  <button onClick={() => openAddFor(meal.id)} className="glass-button-dark" style={{
+                    borderRadius: 10, width: 28, height: 28, fontSize: 16,
                     cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                 )}
               </div>
             </div>
 
             {items.length === 0 ? (
-              <p style={{ padding: '0 16px 14px', color: '#ccc', fontSize: 13, margin: 0 }}>Пусто</p>
+              <p style={{ padding: '0 16px 14px', color: 'var(--color-text-disabled)', fontSize: 13, margin: 0 }}>Пусто</p>
             ) : (
               items.map(e => (
                 <div key={e.id}
                   className={removingId === e.id ? 'entry-removing' : ''}
                   style={{ padding: '10px 16px', display: 'flex',
                     justifyContent: 'space-between', alignItems: 'center',
-                    borderTop: '1px solid #f5f5f5',
+                    borderTop: '1px solid var(--color-border)',
                     cursor: isToday ? 'pointer' : 'default',
                     transition: 'background 0.15s' }}
-                  onClick={() => isToday && openEdit(e)}
-                  onMouseEnter={ev => { if (isToday) ev.currentTarget.style.background = '#fafafa' }}
-                  onMouseLeave={ev => { ev.currentTarget.style.background = 'transparent' }}>
+                  onClick={() => isToday && openEdit(e)}>
                   <div>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: '#111', margin: '0 0 2px' }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)', margin: '0 0 2px' }}>
                       {e.product_name}
                     </p>
-                    <p style={{ fontSize: 11, color: '#aaa', margin: 0 }}>
+                    <p style={{ fontSize: 11, color: 'var(--color-text-secondary)', margin: 0 }}>
                       {e.weight}г · Б{Math.round(e.protein)} Ж{Math.round(e.fat)} У{Math.round(e.carbs)}
                     </p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: '#111', margin: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)', margin: 0 }}>
                       <CountUp value={Math.round(e.calories)} /> ккал
                     </p>
                     {isToday && (
                       <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={ev => { ev.stopPropagation(); openEdit(e) }} style={{
-                          background: '#f4f4f4', border: 'none', borderRadius: 6,
-                          width: 26, height: 26, fontSize: 12, cursor: 'pointer',
+                        <button onClick={ev => { ev.stopPropagation(); openEdit(e) }} className="glass-button" style={{
+                          borderRadius: 8, width: 26, height: 26, fontSize: 12, cursor: 'pointer',
                           display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✏️</button>
                         <button onClick={ev => { ev.stopPropagation(); removeEntry(e.id) }} style={{
-                          background: 'none', border: 'none', color: '#ddd',
+                          background: 'none', border: 'none', color: 'var(--color-text-disabled)',
                           fontSize: 20, cursor: 'pointer', padding: 0, lineHeight: 1,
-                          width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                          onMouseEnter={ev => ev.currentTarget.style.color = '#ff4444'}
-                          onMouseLeave={ev => ev.currentTarget.style.color = '#ddd'}>×</button>
+                          width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
                       </div>
                     )}
                   </div>
@@ -675,34 +657,33 @@ export default function Diary({ session }) {
 
       {/* Модалка редактирования записи */}
       {editingEntry && (
-        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.3)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setEditingEntry(null)}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
+          <div className="glass-sheet" style={{ padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
             animation: 'fadeIn 0.2s ease forwards' }}>
-            <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2, margin: '0 auto 20px' }}/>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 4 }}>Редактировать</h3>
-            <p style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>{editingEntry.product_name}</p>
+            <div style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2, margin: '0 auto 20px' }}/>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 4 }}>Редактировать</h3>
+            <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', marginBottom: 20 }}>{editingEntry.product_name}</p>
 
-            <label style={{ fontSize: 11, fontWeight: 600, color: '#888', display: 'block',
+            <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block',
               marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Вес (г)</label>
             <input type="number" value={editWeight || ''}
               onChange={e => setEditWeight(e.target.value === '' ? '' : +e.target.value)}
               onFocus={e => e.target.select()}
               autoFocus
-              style={{ width: '100%', padding: '14px 16px', background: '#f9f9f9',
-                border: '1.5px solid #ebebeb', borderRadius: 12, color: '#111',
+              style={{ width: '100%', padding: '14px 16px', background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)', borderRadius: 12, color: 'var(--color-text)',
                 fontSize: 24, fontWeight: 700, boxSizing: 'border-box', outline: 'none',
-                marginBottom: 16, textAlign: 'center' }}/>
+                marginBottom: 16, textAlign: 'center', backdropFilter: 'blur(8px)' }}/>
 
             {editComputed && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 20 }}>
                 {[['Ккал', editComputed.cal], ['Б', editComputed.protein],
                   ['Ж', editComputed.fat], ['У', editComputed.carbs]].map(([l, v]) => (
-                  <div key={l} style={{ background: '#f9f9f9', borderRadius: 10, padding: 10, textAlign: 'center' }}>
-                    <p style={{ fontSize: 10, color: '#aaa', margin: '0 0 3px' }}>{l}</p>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: '#111', margin: 0 }}>
+                  <div key={l} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: 10, textAlign: 'center' }}>
+                    <p style={{ fontSize: 10, color: 'var(--color-text-secondary)', margin: '0 0 3px' }}>{l}</p>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
                       <CountUp value={v} duration={300} />
                     </p>
                   </div>
@@ -711,19 +692,16 @@ export default function Diary({ session }) {
             )}
 
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => { setEditingEntry(null); removeEntry(editingEntry.id) }} style={{
-                flex: 1, padding: 14, background: 'none', border: '1.5px solid #ffcccc',
-                borderRadius: 12, color: '#ff4444', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
+              <button onClick={() => { setEditingEntry(null); removeEntry(editingEntry.id) }} className="glass-button" style={{
+                flex: 1, padding: 14, borderRadius: 14, color: 'var(--color-error)', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>
                 Удалить
               </button>
-              <button onClick={() => setEditingEntry(null)} style={{
-                flex: 1, padding: 14, background: '#f4f4f4', border: 'none',
-                borderRadius: 12, color: '#555', fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={() => setEditingEntry(null)} className="glass-button" style={{
+                flex: 1, padding: 14, borderRadius: 14, fontWeight: 600, cursor: 'pointer' }}>
                 Отмена
               </button>
-              <button onClick={saveEdit} disabled={saving} style={{
-                flex: 2, padding: 14, background: '#111', border: 'none',
-                borderRadius: 12, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+              <button onClick={saveEdit} disabled={saving} className="glass-button-dark" style={{
+                flex: 2, padding: 14, borderRadius: 14, fontWeight: 700, cursor: 'pointer' }}>
                 {saving ? 'Сохранение...' : 'Сохранить'}
               </button>
             </div>
@@ -733,14 +711,13 @@ export default function Diary({ session }) {
 
       {/* Календарь */}
       {showCalendar && (
-        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.3)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setShowCalendar(false)}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
+          <div className="glass-sheet" style={{ padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
             animation: 'fadeIn 0.2s ease forwards', maxHeight: '75dvh', overflowY: 'auto' }}>
-            <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2, margin: '0 auto 20px' }}/>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 8 }}>Выбери дату</h3>
+            <div style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2, margin: '0 auto 20px' }}/>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 8 }}>Выбери дату</h3>
 
             <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
               {[
@@ -752,7 +729,7 @@ export default function Diary({ session }) {
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color,
                     boxShadow: item.border ? `0 0 0 1.5px rgb(220,100,100)` : 'none' }}/>
-                  <span style={{ fontSize: 11, color: '#888' }}>{item.label}</span>
+                  <span style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>{item.label}</span>
                 </div>
               ))}
             </div>
@@ -767,50 +744,42 @@ export default function Diary({ session }) {
               const isOver = calPct > 100
 
               return (
-                <button key={d} onClick={() => goToDate(new Date(day))} style={{
-                  width: '100%', padding: '12px 16px', marginBottom: 6,
-                  background: isSelected ? '#111' : '#f9f9f9',
-                  border: isSelected ? 'none' : '1.5px solid #efefef',
-                  borderRadius: 12, cursor: 'pointer',
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  transition: 'all 0.15s' }}>
+                <button key={d} onClick={() => goToDate(new Date(day))}
+                  className={isSelected ? 'glass-button-dark' : 'glass-button'} style={{
+                  width: '100%', padding: '12px 16px', marginBottom: 6, borderRadius: 14, cursor: 'pointer',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                       width: 10, height: 10, borderRadius: '50%',
                       background: isSelected ? 'rgba(255,255,255,0.4)' : dotColor,
                       boxShadow: !isSelected && stat ? `0 0 6px ${dotColor}` : 'none',
                       flexShrink: 0,
-                      border: isOver && !isSelected ? '1.5px solid rgb(220,100,100)' : 'none',
-                      transition: 'background 0.3s ease'
-                    }}/>
+                      border: isOver && !isSelected ? '1.5px solid rgb(220,100,100)' : 'none' }}/>
                     <div style={{ textAlign: 'left' }}>
                       <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 2px',
-                        color: isSelected ? '#fff' : '#111' }}>
+                        color: isSelected ? 'var(--color-bg)' : 'var(--color-text)' }}>
                         {isT ? 'Сегодня' : i === 1 ? 'Вчера' :
                           day.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric', month: 'short' })}
                       </p>
                       {stat ? (
                         <p style={{ fontSize: 11, margin: 0,
-                          color: isSelected ? 'rgba(255,255,255,0.6)' : '#aaa' }}>
+                          color: isSelected ? 'rgba(255,255,255,0.6)' : 'var(--color-text-secondary)' }}>
                           {stat.cal} ккал · Б{stat.protein} Ж{stat.fat} У{stat.carbs}
-                          {isOver && !isSelected &&
-                            <span style={{ color: 'rgb(220,100,100)', marginLeft: 4 }}>↑</span>}
+                          {isOver && !isSelected && <span style={{ color: 'rgb(220,100,100)', marginLeft: 4 }}>↑</span>}
                         </p>
                       ) : (
                         <p style={{ fontSize: 11, margin: 0,
-                          color: isSelected ? 'rgba(255,255,255,0.4)' : '#ccc' }}>
+                          color: isSelected ? 'rgba(255,255,255,0.4)' : 'var(--color-text-disabled)' }}>
                           Ничего не записано
                         </p>
                       )}
                     </div>
                   </div>
                   {isSelected
-                    ? <span style={{ color: '#fff', fontSize: 16 }}>✓</span>
+                    ? <span style={{ fontSize: 16 }}>✓</span>
                     : stat && (
-                      <span style={{ fontSize: 11, fontWeight: 700,
-                        color: getCalendarDotColor(calPct),
-                        background: 'rgba(0,0,0,0.04)',
-                        padding: '2px 7px', borderRadius: 20 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: getCalendarDotColor(calPct),
+                        background: 'rgba(0,0,0,0.04)', padding: '2px 7px', borderRadius: 20 }}>
                         {Math.round(calPct)}%
                       </span>
                     )
@@ -830,14 +799,12 @@ export default function Diary({ session }) {
           background: `rgba(0,0,0,${backdropOpacity})`,
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setAddingTo(null)}>
-          <div ref={sheetRef} style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '85dvh',
-            display: 'flex', flexDirection: 'column',
-            ...sheetStyle }}>
-            <div {...handleProps} style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
+          <div ref={sheetRef} className="glass-sheet" style={{ padding: 24, width: '100%', maxWidth: 480,
+            margin: '0 auto', maxHeight: '85dvh', display: 'flex', flexDirection: 'column', ...sheetStyle }}>
+            <div {...handleProps} style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2,
               margin: '0 auto 16px', flexShrink: 0, cursor: 'grab', touchAction: 'none',
               padding: '10px 20px', marginTop: -10 }}/>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 16, flexShrink: 0 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 16, flexShrink: 0 }}>
               {pickedProduct ? 'Сколько грамм?' : 'Выбери продукт'}
             </h3>
 
@@ -845,54 +812,54 @@ export default function Diary({ session }) {
               <>
                 <input value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Поиск продукта..."
-                  style={{ width: '100%', padding: '11px 14px', background: '#f9f9f9',
-                    border: '1.5px solid #ebebeb', borderRadius: 10, color: '#111',
+                  style={{ width: '100%', padding: '11px 14px', background: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)', borderRadius: 10, color: 'var(--color-text)',
                     fontSize: 14, boxSizing: 'border-box', outline: 'none',
-                    marginBottom: 12, flexShrink: 0 }}/>
+                    marginBottom: 12, flexShrink: 0, backdropFilter: 'blur(8px)' }}/>
                 <div style={{ overflowY: 'auto', flex: 1 }}>
                   {filteredProducts.length === 0 && (
-                    <p style={{ textAlign: 'center', color: '#ccc', padding: 20, fontSize: 13 }}>
+                    <p style={{ textAlign: 'center', color: 'var(--color-text-disabled)', padding: 20, fontSize: 13 }}>
                       Продуктов не найдено. Добавь их в разделе "Продукты"
                     </p>
                   )}
                   {filteredProducts.map(p => (
                     <button key={p.id} onClick={() => setPickedProduct(p)} style={{
-                      width: '100%', padding: '12px 14px', background: '#f9f9f9',
+                      width: '100%', padding: '12px 14px', background: 'var(--color-surface)',
                       border: 'none', borderRadius: 10, marginBottom: 6,
                       textAlign: 'left', cursor: 'pointer', display: 'flex',
                       justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#111' }}>{p.name}</span>
-                      <span style={{ fontSize: 12, color: '#aaa' }}>{p.calories} ккал/100г</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text)' }}>{p.name}</span>
+                      <span style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>{p.calories} ккал/100г</span>
                     </button>
                   ))}
                 </div>
               </>
             ) : (
               <div>
-                <div style={{ background: '#f9f9f9', borderRadius: 12, padding: 14, marginBottom: 16 }}>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#111', margin: '0 0 4px' }}>
+                <div style={{ background: 'var(--color-surface)', borderRadius: 14, padding: 14, marginBottom: 16 }}>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text)', margin: '0 0 4px' }}>
                     {pickedProduct.name}
                   </p>
-                  <p style={{ fontSize: 12, color: '#aaa', margin: 0 }}>
+                  <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: 0 }}>
                     {pickedProduct.calories} ккал / 100г
                   </p>
                 </div>
-                <label style={{ fontSize: 11, fontWeight: 600, color: '#888', display: 'block',
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-secondary)', display: 'block',
                   marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Вес (г)</label>
                 <input type="number" value={weight || ''}
                   onChange={e => setWeight(e.target.value === '' ? '' : +e.target.value)}
                   onFocus={e => e.target.select()}
                   autoFocus
-                  style={{ width: '100%', padding: '14px 16px', background: '#f9f9f9',
-                    border: '1.5px solid #ebebeb', borderRadius: 12, color: '#111',
+                  style={{ width: '100%', padding: '14px 16px', background: 'var(--color-surface)',
+                    border: '1px solid var(--color-border)', borderRadius: 14, color: 'var(--color-text)',
                     fontSize: 20, fontWeight: 700, boxSizing: 'border-box', outline: 'none',
-                    marginBottom: 16, textAlign: 'center' }}/>
+                    marginBottom: 16, textAlign: 'center', backdropFilter: 'blur(8px)' }}/>
                 {computed && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
                     {[['Ккал', computed.cal], ['Б', computed.protein], ['Ж', computed.fat], ['У', computed.carbs]].map(([l, v]) => (
-                      <div key={l} style={{ background: '#f9f9f9', borderRadius: 8, padding: 8, textAlign: 'center' }}>
-                        <p style={{ fontSize: 10, color: '#aaa', margin: '0 0 2px' }}>{l}</p>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: '#111', margin: 0 }}>
+                      <div key={l} style={{ background: 'var(--color-surface)', borderRadius: 10, padding: 8, textAlign: 'center' }}>
+                        <p style={{ fontSize: 10, color: 'var(--color-text-secondary)', margin: '0 0 2px' }}>{l}</p>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>
                           <CountUp value={v} duration={300} />
                         </p>
                       </div>
@@ -901,20 +868,18 @@ export default function Diary({ session }) {
                 )}
                 <button onClick={() => setPickedProduct(null)} style={{
                   width: '100%', padding: 10, background: 'none', border: 'none',
-                  color: '#888', fontSize: 13, marginBottom: 8, cursor: 'pointer' }}>
+                  color: 'var(--color-text-secondary)', fontSize: 13, marginBottom: 8, cursor: 'pointer' }}>
                   ← Выбрать другой продукт
                 </button>
               </div>
             )}
 
             <div style={{ display: 'flex', gap: 10, marginTop: 12, flexShrink: 0 }}>
-              <button onClick={() => setAddingTo(null)} style={{
-                flex: 1, padding: 14, background: '#f4f4f4', border: 'none',
-                borderRadius: 12, color: '#555', fontWeight: 600, cursor: 'pointer' }}>Отмена</button>
+              <button onClick={() => setAddingTo(null)} className="glass-button" style={{
+                flex: 1, padding: 14, borderRadius: 14, fontWeight: 600, cursor: 'pointer' }}>Отмена</button>
               {pickedProduct && (
-                <button onClick={confirmAdd} disabled={saving} style={{
-                  flex: 2, padding: 14, background: '#111', border: 'none',
-                  borderRadius: 12, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+                <button onClick={confirmAdd} disabled={saving} className="glass-button-dark" style={{
+                  flex: 2, padding: 14, borderRadius: 14, fontWeight: 700, cursor: 'pointer' }}>
                   {saving ? 'Добавление...' : 'Добавить'}
                 </button>
               )}
@@ -923,43 +888,39 @@ export default function Diary({ session }) {
         </div>
         )
       })()}
-      {!addingTo && dragClose.sheetStyle.transform !== 'translateY(0px)' && null}
 
       {/* Редактор приёмов пищи */}
       {showMealEditor && (
-        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.4)',
+        <div style={{ position: 'fixed', inset: 0, height: '100dvh', background: 'rgba(0,0,0,0.3)',
           display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
           onClick={e => e.target === e.currentTarget && setShowMealEditor(false)}>
-          <div style={{ background: '#fff', borderRadius: '20px 20px 0 0',
-            padding: 24, width: '100%', maxWidth: 480, margin: '0 auto', maxHeight: '85dvh',
-            display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.2s ease forwards' }}>
-            <div style={{ width: 36, height: 4, background: '#e5e5e5', borderRadius: 2,
+          <div className="glass-sheet" style={{ padding: 24, width: '100%', maxWidth: 480, margin: '0 auto',
+            maxHeight: '85dvh', display: 'flex', flexDirection: 'column', animation: 'fadeIn 0.2s ease forwards' }}>
+            <div style={{ width: 36, height: 4, background: 'var(--color-border)', borderRadius: 2,
               margin: '0 auto 16px', flexShrink: 0 }}/>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 16, flexShrink: 0 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text)', marginBottom: 16, flexShrink: 0 }}>
               Приёмы пищи
             </h3>
             <div style={{ overflowY: 'auto', flex: 1, marginBottom: 16 }}>
               {meals.map((meal, i) => (
                 <div key={meal.id} style={{ display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '10px 0', borderBottom: '1px solid #f5f5f5' }}>
+                  padding: '10px 0', borderBottom: '1px solid var(--color-border)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <button onClick={() => moveMeal(i, -1)} disabled={i === 0} style={{
                       background: 'none', border: 'none', cursor: i === 0 ? 'default' : 'pointer',
-                      color: i === 0 ? '#eee' : '#888', fontSize: 12, padding: 0 }}>▲</button>
+                      color: i === 0 ? 'var(--color-text-disabled)' : 'var(--color-text-secondary)', fontSize: 12, padding: 0 }}>▲</button>
                     <button onClick={() => moveMeal(i, 1)} disabled={i === meals.length - 1} style={{
                       background: 'none', border: 'none', cursor: i === meals.length - 1 ? 'default' : 'pointer',
-                      color: i === meals.length - 1 ? '#eee' : '#888', fontSize: 12, padding: 0 }}>▼</button>
+                      color: i === meals.length - 1 ? 'var(--color-text-disabled)' : 'var(--color-text-secondary)', fontSize: 12, padding: 0 }}>▼</button>
                   </div>
                   <input value={meal.name}
                     onChange={e => setMeals(meals.map(m => m.id === meal.id ? { ...m, name: e.target.value } : m))}
                     onBlur={e => renameMeal(meal.id, e.target.value)}
-                    style={{ flex: 1, padding: '8px 12px', background: '#f9f9f9',
-                      border: '1.5px solid #ebebeb', borderRadius: 8, fontSize: 14, outline: 'none' }}/>
+                    style={{ flex: 1, padding: '8px 12px', background: 'var(--color-surface)',
+                      border: '1px solid var(--color-border)', borderRadius: 8, fontSize: 14, outline: 'none', color: 'var(--color-text)' }}/>
                   <button onClick={() => removeMeal(meal.id)} style={{
-                    background: 'none', border: 'none', color: '#ddd', fontSize: 20,
-                    cursor: 'pointer', padding: 4 }}
-                    onMouseEnter={e => e.target.style.color = '#ff4444'}
-                    onMouseLeave={e => e.target.style.color = '#ddd'}>×</button>
+                    background: 'none', border: 'none', color: 'var(--color-text-disabled)', fontSize: 20,
+                    cursor: 'pointer', padding: 4 }}>×</button>
                 </div>
               ))}
             </div>
@@ -967,15 +928,13 @@ export default function Diary({ session }) {
               <input value={newMealName} onChange={e => setNewMealName(e.target.value)}
                 placeholder="Новый приём пищи..."
                 onKeyDown={e => e.key === 'Enter' && addMeal()}
-                style={{ flex: 1, padding: '11px 14px', background: '#f9f9f9',
-                  border: '1.5px solid #ebebeb', borderRadius: 10, fontSize: 14, outline: 'none' }}/>
-              <button onClick={addMeal} style={{
-                padding: '11px 16px', background: '#111', border: 'none',
-                borderRadius: 10, color: '#fff', fontWeight: 600, cursor: 'pointer' }}>+</button>
+                style={{ flex: 1, padding: '11px 14px', background: 'var(--color-surface)',
+                  border: '1px solid var(--color-border)', borderRadius: 10, fontSize: 14, outline: 'none', color: 'var(--color-text)' }}/>
+              <button onClick={addMeal} className="glass-button-dark" style={{
+                padding: '11px 16px', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>+</button>
             </div>
-            <button onClick={() => setShowMealEditor(false)} style={{
-              width: '100%', padding: 14, background: '#f4f4f4', border: 'none',
-              borderRadius: 12, color: '#555', fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>
+            <button onClick={() => setShowMealEditor(false)} className="glass-button" style={{
+              width: '100%', padding: 14, borderRadius: 14, fontWeight: 600, cursor: 'pointer', marginTop: 16 }}>
               Готово
             </button>
           </div>
